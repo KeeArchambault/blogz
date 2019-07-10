@@ -26,7 +26,12 @@ def newpost():
         post = request.form['post']
         posts.append(post)
 
-    return render_template('index.html',title="Home", posts=posts)
+    return render_template('index.html',title="New Post", posts=posts)
+
+@app.route("/blog")
+def blog(): 
+
+    return render_template("blog.html", title="Blog")
 
 
 
