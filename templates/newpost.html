@@ -4,12 +4,19 @@
     <h1>{{title}}</h1>
     <form method='post'>
         <label>
-            New Post:
+            Header:
             <br>
-            <textarea name='post'></textarea>
+            <input type="text" name ="header"/>
         </label>
         <br>
-        <input type="submit" value='Add a New Post' />
+        <br>
+        <label>
+            Post:
+            <br>
+            <textarea name='body'></textarea>
+        </label>
+        <br>
+        <input type="submit" value='Add' />
     </form>
     
 {% endblock %}

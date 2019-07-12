@@ -1,18 +1,19 @@
 {% extends "base.html" %}
 
-   {% if posts|length == 0 %}
-    <p>No posts yet</p>
-    {% else %}
-
-        <ul>
-            {% for post in posts %}
-            <li>{{post}}</li>
-            {% endfor %}
-        </ul>
-
-    {% endif %}
-
 {% block content %}
+
+{% if posts|length == 0 %}
+<p>No posts yet.</p>
+{% else %}
+
+    <ul style="list-style: none;">
+        {% for post in posts %}
+        <li><h1>{{post.header}}</h1></li>
+        <li>{{post.body}}</li>
+        {% endfor %}
+    </ul>
+
+{% endif %}
 
 
 
