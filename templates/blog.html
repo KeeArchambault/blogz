@@ -6,12 +6,13 @@
 <p>No posts yet.</p>
 {% else %}
 
-    <ul style="list-style: none;">
-        {% for post in posts %}
-        <li><h1>{{post.header}}</h1></li>
-        <li>{{post.body}}</li>
-        {% endfor %}
-    </ul>
+
+    {% for post in posts %}
+        <a href ="/indiv1?id={{id}}"><h1>{{post.header}}</h1></a>
+        {{post.body}}
+        <hr>
+    {% endfor %}
+
 
 {% endif %}
 

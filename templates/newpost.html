@@ -1,19 +1,20 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>{{title}}</h1>
     <form method='post'>
         <label>
-            Header:
+            Title:
             <br>
-            <input type="text" name ="header"/>
+            <input style= "width: 300px" type="text" name ="header" value ={{header}}></input>
+            <p style = "color: red;">{{header_error}}</p>
         </label>
         <br>
         <br>
         <label>
             Post:
             <br>
-            <textarea name='body'></textarea>
+            <textarea name='body' style="height: 100px; width: 300px">{{body}}</textarea>
+            <p style = "color: red;">{{body_error}}</p>
         </label>
         <br>
         <input type="submit" value='Add' />
