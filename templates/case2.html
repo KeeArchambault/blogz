@@ -1,8 +1,12 @@
 {% extends "base.html" %}
- <h1>{{header}}</h1>
-{{post}}
-<hr>
+
 {% block content %}
+
+{% for i in post %}
+    <h1>{{i.header}}</h1>
+    {{i.body}}
+    <hr>
+{%endfor%}    
 
 
 
