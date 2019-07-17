@@ -48,16 +48,16 @@ def newpost():
 @app.route("/case1")
 def case1():
 
-    post = Blog.query.filter_by(id="id").all()
+    post = Blog.query.filter_by(id="id")
 
-    return render_template('case1.html')
+    return render_template('indiv.html', post = post)
 
 @app.route("/case2")
 def case2():  
 
-    post = Blog.query.filter_by(id="id").all()
+    post = Blog.query.filter_by(id="id")
 
-    return render_template("case2.html", post = post)
+    return render_template("indiv.html", post = post)
 
 
 @app.route("/blog")
