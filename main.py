@@ -39,7 +39,8 @@ def newpost():
             new_post = Blog(header, body)
             db.session.add(new_post)
             db.session.commit()
-            return redirect("/case2?id="+ str(new_post.id))
+            post_id = new_post.id
+            return redirect("/case2?id="+ str(post_id))
 
         return render_template('newpost.html',title="New Post", header = header, body = body, body_error = body_error, header_error = header_error)  
     
@@ -48,15 +49,17 @@ def newpost():
 @app.route("/case1")
 def case1():
 
-    post = Blog.query.filter_by(id="id")
+    post_id= request.args.get('id')
+    post = Blog.query.get(post_id)
 
     return render_template('indiv.html', post = post)
 
 @app.route("/case2")
 def case2():  
 
-    post = Blog.query.filter_by(id="id")
-
+    post_id= request.args.get('id')
+    post = Blog.query.get(post_id)
+    
     return render_template("indiv.html", post = post)
 
 
