@@ -1,21 +1,110 @@
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:build-a-blog@localhost:8889/build-a-blog'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:blogz@localhost:8889/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
+app.secret_key = 'y337kGcys&zP3B'
 
 class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     header = db.Column(db.String(255))
     body = db.Column(db.String(255))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, header, body):
+    def __init__(self, header, body, user):
         self.header = header
         self.body = body
+        self.user = user
+    
 
+class User(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True)
+    password = db.Column(db.String(120))
+    blogs = db.relationship('Blog', backref='user')
+
+    def __init__(self, email, password):
+        self.email = email
+        self.password = password      
+
+
+@app.route('/signup', methods=['POST', 'GET'])
+def signup():
+
+    password = request.args.get("password")
+    verify= request.args.get("verify")
+    email = request.args.get("email")
+
+    email_error= ""
+    password_error= ""
+    verify_error= ""
+   
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        verify = request.form['verify']
+
+        existing_user = User.query.filter_by(email=email).first()
+       
+    if not email or len(email) < 3 or len(email) > 20 or " " in email or email.count("@") != 1 or email.count(".")!= 1:
+        email_error = "Please provide a valid email."
+        email= ""   
+
+    if not password or len(password) < 3 or len(password) > 20 or " " in password:
+        password_error = "Please provide a valid password."
+        password= ""
+        
+    if password:
+        if verify != password:
+            verify_error="Passwords do not match."
+            verify= ""
+             
+    if not password_error and not verify_error and not email_error:
+        new_user = User(email, password)
+        db.session.add(new_user)
+        db.session.commit()
+        session['email'] = email
+        return redirect('/newpost')
+    else:
+        return render_template("signup.html", password=password, password_error=password_error, verify=verify, verify_error=verify_error, email=email, email_error=email_error)
+
+        # else:
+        #     return "<h1>Duplicate user</h1>"
+
+        return render_template("signup.html")
+
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(email=email).first()
+        if user and user.password == password:
+            session['email'] = email
+            flash("Logged in")
+            return redirect('/newpost')
+        else:
+            flash('User password incorrect, or user does not exist', 'error')
+
+    return render_template('login.html')
+
+
+# @app.route('/', methods=['POST', 'GET'])
+# def index():
+
+    
+
+
+# @app.route("/logout", methods=['POST'])
+# def logout():  
+
+
+#     return redirect("/blog")
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
@@ -26,8 +115,15 @@ def newpost():
     header_error = ""
    
     if request.method == 'POST':
+
+        user = User.query.filter_by(email=session['email']).first()
         header = request.form['header']
         body = request.form['body']
+        new_post = Blog(header, body, user)
+        db.session.add(new_post)
+        db.session.commit()
+
+        posts = Blog.query.filter_by(user=user).all()
 
         if not header:
             header_error = "Please enter a valid title."
@@ -36,7 +132,7 @@ def newpost():
             body_error = "Please write a post."
 
         if not header_error and not body_error:
-            new_post = Blog(header, body)
+            new_post = Blog(header, body, user)
             db.session.add(new_post)
             db.session.commit()
             post_id = new_post.id
@@ -66,10 +162,12 @@ def case2():
 @app.route("/blog")
 def blog(): 
 
-    posts = Blog.query.all()
+    
+    user = User.query.filter_by(email=session['email']).first()
+
+    posts = Blog.query.filter_by(user=user).all()
 
     return render_template("blog.html", title="All Posts", posts=posts)
-
 
 if __name__ == '__main__':
     app.run()
