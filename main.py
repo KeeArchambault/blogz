@@ -31,6 +31,11 @@ class User(db.Model):
         self.email = email
         self.password = password      
 
+@app.before_request
+def require_login():
+    allowed_routes = ['login', 'signup']
+    if request.endpoint not in allowed_routes and 'email' not in session:
+        return redirect('/signup')
 
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
@@ -39,10 +44,12 @@ def signup():
     verify= request.args.get("verify")
     email = request.args.get("email")
 
+    exist_error=""
     email_error= ""
     password_error= ""
     verify_error= ""
-   
+
+
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -62,8 +69,14 @@ def signup():
         if verify != password:
             verify_error="Passwords do not match."
             verify= ""
+
+    existing_user = User.query.filter_by(email=email).first()
+
+    if existing_user:
+        exist_error="Duplicate user."
+         
              
-    if not password_error and not verify_error and not email_error:
+    if not password_error and not verify_error and not email_error and not exist_error:
         new_user = User(email, password)
         db.session.add(new_user)
         db.session.commit()
@@ -94,17 +107,17 @@ def login():
     return render_template('login.html')
 
 
-# @app.route('/', methods=['POST', 'GET'])
-# def index():
+@app.route('/', methods=['POST', 'GET'])
+def index():
 
     
+    return render_template("index.html")
 
+@app.route('/logout')
+def logout():
 
-# @app.route("/logout", methods=['POST'])
-# def logout():  
-
-
-#     return redirect("/blog")
+    del session['email']
+    return redirect('/')
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
