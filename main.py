@@ -32,6 +32,12 @@ class User(db.Model):
         self.password = password      
 
 
+@app.before_request
+def require_login():
+    allowed_routes = ['login', 'signup']
+    if request.endpoint not in allowed_routes and 'email' not in session:
+        return redirect('/login')
+
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
 
@@ -49,33 +55,35 @@ def signup():
         verify = request.form['verify']
 
         existing_user = User.query.filter_by(email=email).first()
-       
-    if not email or len(email) < 3 or len(email) > 20 or " " in email or email.count("@") != 1 or email.count(".")!= 1:
-        email_error = "Please provide a valid email."
-        email= ""   
+        if existing_user:
+              return "<h1>User already exists.</h1> <br> <a href='/signup'><h1>Back</h1></a>"
 
-    if not password or len(password) < 3 or len(password) > 20 or " " in password:
-        password_error = "Please provide a valid password."
-        password= ""
-        
-    if password:
-        if verify != password:
-            verify_error="Passwords do not match."
-            verify= ""
-             
-    if not password_error and not verify_error and not email_error:
-        new_user = User(email, password)
-        db.session.add(new_user)
-        db.session.commit()
-        session['email'] = email
-        return redirect('/newpost')
-    else:
-        return render_template("signup.html", password=password, password_error=password_error, verify=verify, verify_error=verify_error, email=email, email_error=email_error)
+        if not email or len(email) < 3 or len(email) > 20 or " " in email or email.count("@") != 1 or email.count(".")!= 1:
+            email_error = "Please provide a valid email."
+            email= ""   
+
+        if not password or len(password) < 3 or len(password) > 20 or " " in password:
+            password_error = "Please provide a valid password."
+            password= ""
+            
+        if password:
+            if verify != password:
+                verify_error="Passwords do not match."
+                verify= ""
+                
+        if not password_error and not verify_error and not email_error:
+            new_user = User(email, password)
+            db.session.add(new_user)
+            db.session.commit()
+            session['email'] = email
+            return redirect('/newpost')
+        else:
+            return render_template("signup.html", password=password, password_error=password_error, verify=verify, verify_error=verify_error, email=email, email_error=email_error)
 
         # else:
         #     return "<h1>Duplicate user</h1>"
 
-        return render_template("signup.html")
+    return render_template("signup.html")
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -94,17 +102,18 @@ def login():
     return render_template('login.html')
 
 
-# @app.route('/', methods=['POST', 'GET'])
-# def index():
+@app.route('/', methods=['POST', 'GET'])
+def index():
 
-    
+    list = User.query.all()
 
-
-# @app.route("/logout", methods=['POST'])
-# def logout():  
+    return render_template("index.html", list = list)
 
 
-#     return redirect("/blog")
+@app.route("/logout")
+def logout():  
+    del session['email']
+    return redirect("/")
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
@@ -115,16 +124,10 @@ def newpost():
     header_error = ""
    
     if request.method == 'POST':
-
         user = User.query.filter_by(email=session['email']).first()
         header = request.form['header']
+        
         body = request.form['body']
-        new_post = Blog(header, body, user)
-        db.session.add(new_post)
-        db.session.commit()
-
-        posts = Blog.query.filter_by(user=user).all()
-
         if not header:
             header_error = "Please enter a valid title."
             
@@ -132,14 +135,25 @@ def newpost():
             body_error = "Please write a post."
 
         if not header_error and not body_error:
+          
             new_post = Blog(header, body, user)
+            post_id= new_post.id
             db.session.add(new_post)
             db.session.commit()
-            post_id = new_post.id
-            return redirect("/case2?id="+ str(post_id))
 
-        return render_template('newpost.html',title="New Post", header = header, body = body, body_error = body_error, header_error = header_error)  
-    
+            #posts = Blog.query.filter_by(user=user).all()
+            return redirect("/case2?id="+ str(post_id))
+           
+
+        return render_template('newpost.html',title="New Post", header = header, body = body, body_error = body_error, header_error = header_error)    
+
+            # if not header_error and not body_error:
+            #     new_post = Blog(header, body, user)
+            #     db.session.add(new_post)
+            #     db.session.commit()
+            #     post_id = new_post.id
+            #     return redirect("/case2?id="+ str(post_id)
+        
     return render_template('newpost.html', title="New Post")
 
 @app.route("/case1")
@@ -161,7 +175,6 @@ def case2():
 
 @app.route("/blog")
 def blog(): 
-
     
     user = User.query.filter_by(email=session['email']).first()
 
