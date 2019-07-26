@@ -10,7 +10,7 @@
     {% for post in posts %}
         <a style=" text-decoration: none" href="/case1?id={{post.id}}"><h1>{{post.header}}</h1></a>
         <p>{{post.body}}</p>
-        <a style=" text-decoration: none; color:gray; font-size: 10pt;" href="/single_user?id={{user.id}}"><p>post by {{user.email}}</p></a>
+        <a style=" text-decoration: none; color:gray; font-size: 10pt;" href="/single_user?Uid={{user.id}}"><p>post by {{user.email}}</p></a>
         <hr>
     {% endfor %}
 
