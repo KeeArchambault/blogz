@@ -39,7 +39,7 @@ def require_login():
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'signup']
+    allowed_routes = ['login', 'signup', 'blog']
     if request.endpoint not in allowed_routes and 'email' not in session:
         flash("Login Required")
         return redirect('/login')
@@ -168,20 +168,31 @@ def case2():
     
     return render_template("indiv.html", post = post)
 
-@app.route("/blog")
+@app.route("/blog",methods=['POST', 'GET'])
 def blog(): 
     
-    if request.method == 'POST':
-        user_id= request.args.get('id')
-        user = User.query.get(user_id)
-        posts = Blog.query.filter_by(user_id=user_id).all()
-    return redirect("/single_user?id=user_id")
 
-    if request.method == 'GET':
-        user_id= request.args.get('id')
-        posts = Blog.query.all()
-        user = User.query.get(user_id)
-    return render_template("blog.html", posts = posts, user=user)    
+    if "id" in request.args:
+       post_id= request.args.get('id')
+       posts= Blog.query.filter_by(id= post_id).all()
+       return render_template('blog.html', posts= posts, id= post_id)
+
+    elif "Uid" in request.args:
+       user_id= request.args.get('Uid')
+       blogs= Blog.query.filter_by(owner_id= user_id).all()
+       return render_template('blog.html', posts= posts, Uid = user_id)
+
+    else:
+       posts= Blog.query.order_by(Blog.id.desc()).all()
+       return render_template('blog.html', posts = posts)
+
+    # if request.method == 'GET':
+    #     user_id= request.args.get('id')
+    
+    #     return redirect("/single_user?id=user_id")
+    
+    # posts = Blog.query.all()
+    # return render_template("blog.html", posts = posts)    
 
 @app.route("/single_user")
 def single_user():
