@@ -112,11 +112,8 @@ def login():
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    user = User.query.filter_by(email=session['email']).all()
-    list = User.query.all()
-
-    return render_template("index.html", list = list, user=user)
-
+        users = User.query.all()
+        return render_template("index.html", users=users)  
 
 @app.route("/logout")
 def logout():  
@@ -147,20 +144,11 @@ def newpost():
             new_post = Blog(header, body, user)
             db.session.add(new_post)
             db.session.commit()
-            user = User.query.filter_by(email=session['email']).all()
-
-            #posts = Blog.query.filter_by(user=user).all()
+    
             return redirect("/case2?id="+ str(new_post.id))
            
 
         return render_template('newpost.html',title="New Post", header = header, body = body, body_error = body_error, header_error = header_error)    
-
-            # if not header_error and not body_error:
-            #     new_post = Blog(header, body, user)
-            #     db.session.add(new_post)
-            #     db.session.commit()
-            #     post_id = new_post.id
-            #     return redirect("/case2?id="+ str(post_id)
         
     return render_template('newpost.html', title="New Post")
 
@@ -180,15 +168,25 @@ def case2():
     
     return render_template("indiv.html", post = post)
 
-
 @app.route("/blog")
 def blog(): 
     
+    if request.method == 'POST':
+        user_id= request.args.get('id')
+
+        return redirect("/single_user?id=user_id")
 
     posts = Blog.query.all()
 
-
     return render_template("blog.html", title="All Posts", posts=posts)
+
+@app.route("/single_user")
+def single_user():
+    user_id= request.args.get('id')
+    posts = Blog.query.filter_by(user_id=user_id).all()  
+
+    return render_template("single_user.html", posts= posts)
+
 
 if __name__ == '__main__':
     app.run()

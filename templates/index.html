@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-   {% for i in list %}
-   <ul>
-       <li><a style=" text-decoration: none" href="/?email={{user.email}}">{{user.email}}</a></li>
-    </ul>   
+   {% for user in users %}
+        <a style=" text-decoration: none" href="/single_user?id={{user.id}}"><p>{{user.email}}</p></a>
+        
     {% endfor %}
 
     
