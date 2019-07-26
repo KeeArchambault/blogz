@@ -3,7 +3,7 @@
 {% block content %}
    {% for i in list %}
    <ul>
-       <li><a style=" text-decoration: none" href="/case1?email={{user.email}}">{{i}}</a></li>
+       <li><a style=" text-decoration: none" href="/?email={{user.email}}">{{user.email}}</a></li>
     </ul>   
     {% endfor %}
 
