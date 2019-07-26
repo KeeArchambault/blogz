@@ -2,6 +2,17 @@
 <html>
     <head>
         <title>{{title}}</title>
+        <style>
+            ul{
+                list-style: none;
+                padding-left: 0;
+
+            }
+
+            a{
+                text-decoration: none;
+            }
+        </style>
     </head>
 <body>
   <nav>
@@ -14,7 +25,17 @@
 </nav>
 
     {% block content %}
+    
     {% endblock %}
+
+{% with messages = get_flashed_messages(with_categories=True) %}
+    <ul style="list-style: none; color: gray;">
+    {% for category,message in messages %}
+        <li class="{{category}}">{{message}}</li>
+    {% endfor %}
+    </ul>
+{% endwith %}
+    
 
 
 </body>

@@ -2,7 +2,9 @@
 
 {% block content %}
    {% for i in list %}
-       <p>{{i}}</p></a>
+   <ul>
+       <li><a style=" text-decoration: none" href="/case1?email={{user.email}}">{{i}}</a></li>
+    </ul>   
     {% endfor %}
 
     

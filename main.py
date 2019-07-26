@@ -34,8 +34,9 @@ class User(db.Model):
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'signup']
+    allowed_routes = ['login', 'signup', 'blog']
     if request.endpoint not in allowed_routes and 'email' not in session:
+        flash("Login Required")
         return redirect('/login')
 
 @app.route('/signup', methods=['POST', 'GET'])
@@ -56,7 +57,7 @@ def signup():
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
-              return "<h1>User already exists.</h1> <br> <a href='/signup'><h1>Back</h1></a>"
+              return "<h1>User already exists.</h1> <br> <a href='/signup'><h1 style='text-decoration: none;'>Back</h1></a>"
 
         if not email or len(email) < 3 or len(email) > 20 or " " in email or email.count("@") != 1 or email.count(".")!= 1:
             email_error = "Please provide a valid email."
@@ -97,23 +98,23 @@ def login():
             flash("Logged in")
             return redirect('/newpost')
         else:
-            flash('User password incorrect, or user does not exist', 'error')
+            flash('User password incorrect, or user does not exist.', 'error')
 
     return render_template('login.html')
 
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-
+    user = User.query.filter_by(email=session['email']).all()
     list = User.query.all()
 
-    return render_template("index.html", list = list)
+    return render_template("index.html", list = list, user=user)
 
 
 @app.route("/logout")
 def logout():  
     del session['email']
-    return redirect("/")
+    return redirect("/blog")
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
@@ -137,12 +138,12 @@ def newpost():
         if not header_error and not body_error:
           
             new_post = Blog(header, body, user)
-            post_id= new_post.id
             db.session.add(new_post)
             db.session.commit()
+            user = User.query.filter_by(email=session['email']).all()
 
             #posts = Blog.query.filter_by(user=user).all()
-            return redirect("/case2?id="+ str(post_id))
+            return redirect("/case2?id="+ str(new_post.id))
            
 
         return render_template('newpost.html',title="New Post", header = header, body = body, body_error = body_error, header_error = header_error)    
@@ -176,9 +177,9 @@ def case2():
 @app.route("/blog")
 def blog(): 
     
-    user = User.query.filter_by(email=session['email']).first()
 
-    posts = Blog.query.filter_by(user=user).all()
+    posts = Blog.query.all()
+
 
     return render_template("blog.html", title="All Posts", posts=posts)
 
