@@ -173,19 +173,23 @@ def blog():
     
     if request.method == 'POST':
         user_id= request.args.get('id')
+        user = User.query.get(user_id)
+        posts = Blog.query.filter_by(user_id=user_id).all()
+    return redirect("/single_user?id=user_id")
 
-        return redirect("/single_user?id=user_id")
-
-    posts = Blog.query.all()
-
-    return render_template("blog.html", title="All Posts", posts=posts)
+    if request.method == 'GET':
+        user_id= request.args.get('id')
+        posts = Blog.query.all()
+        user = User.query.get(user_id)
+    return render_template("blog.html", posts = posts, user=user)    
 
 @app.route("/single_user")
 def single_user():
-    user_id= request.args.get('id')
-    posts = Blog.query.filter_by(user_id=user_id).all()  
+        user_id= request.args.get('id')
+        posts = Blog.query.filter_by(user_id=user_id).all()  
+        user = User.query.get(user_id)
 
-    return render_template("single_user.html", posts= posts)
+        return render_template("single_user.html", posts= posts, user = user)  
 
 
 if __name__ == '__main__':
