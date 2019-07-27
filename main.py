@@ -31,17 +31,12 @@ class User(db.Model):
         self.email = email
         self.password = password      
 
-@app.before_request
-def require_login():
-    allowed_routes = ['login', 'signup']
-    if request.endpoint not in allowed_routes and 'email' not in session:
-        return redirect('/signup')
 
 @app.before_request
 def require_login():
     allowed_routes = ['login', 'signup', 'blog']
     if request.endpoint not in allowed_routes and 'email' not in session:
-        flash("Login Required")
+        flash("Login required.")
         return redirect('/login')
 
 @app.route('/signup', methods=['POST', 'GET'])
@@ -64,7 +59,8 @@ def signup():
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
-              return "<h1>User already exists.</h1> <br> <a href='/signup'><h1 style='text-decoration: none;'>Back</h1></a>"
+            flash("User already exists.")
+            return redirect("/signup")
 
         if not email or len(email) < 3 or len(email) > 20 or " " in email or email.count("@") != 1 or email.count(".")!= 1:
             email_error = "Please provide a valid email."
@@ -88,9 +84,6 @@ def signup():
         else:
             return render_template("signup.html", password=password, password_error=password_error, verify=verify, verify_error=verify_error, email=email, email_error=email_error)
 
-        # else:
-        #     return "<h1>Duplicate user</h1>"
-
     return render_template("signup.html")
 
 
@@ -102,7 +95,7 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user and user.password == password:
             session['email'] = email
-            flash("Logged in")
+            flash("Logged in.")
             return redirect('/newpost')
         else:
             flash('User password incorrect, or user does not exist.', 'error')
@@ -118,7 +111,8 @@ def index():
 @app.route("/logout")
 def logout():  
     del session['email']
-    return redirect("/")
+    flash("Logged out.")
+    return redirect("/blog")
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
@@ -171,7 +165,6 @@ def case2():
 @app.route("/blog",methods=['POST', 'GET'])
 def blog(): 
     
-
     if "id" in request.args:
        post_id= request.args.get('id')
        posts= Blog.query.filter_by(id= post_id).all()
@@ -185,14 +178,6 @@ def blog():
     else:
        posts= Blog.query.order_by(Blog.id.desc()).all()
        return render_template('blog.html', posts = posts)
-
-    # if request.method == 'GET':
-    #     user_id= request.args.get('id')
-    
-    #     return redirect("/single_user?id=user_id")
-    
-    # posts = Blog.query.all()
-    # return render_template("blog.html", posts = posts)    
 
 @app.route("/single_user")
 def single_user():

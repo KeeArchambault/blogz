@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<h1>All Users</h1>
    {% for user in users %}
         <a style=" text-decoration: none" href="/single_user?id={{user.id}}"><p>{{user.email}}</p></a>
         
