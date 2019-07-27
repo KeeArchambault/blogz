@@ -7,7 +7,6 @@
 {% else %}
 
  <h1>Posts by {{user.email}}</h1>
-        <hr>
     {% for post in posts %}
         <a style=" text-decoration: none" href="/case1?id={{post.id}}"><h1>{{post.header}}</h1></a>
         <p>{{post.body}}</p>
